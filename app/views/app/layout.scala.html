@@ -1,0 +1,52 @@
+@(title: String)(implicit content: Html = Html(""))
+<!DOCTYPE html>
+<html ng-app="app">
+    <head>
+      <title>@title</title>
+      <!-- Latest compiled and minified CSS -->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <link rel="stylesheet" media="screen" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+      <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-override.css")">
+      <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/app.css")">
+      <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/fav.png")">
+      <script src="@routes.Assets.at("javascripts/routes")" type="text/javascript"></script>
+      <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+      <!--<script src="@routes.Assets.at("bootstrap/js/bootstrap.min.js")" type="text/javascript"></script>-->
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+      <script src="@routes.Assets.at("javascripts/app.js")" type="text/javascript"></script>
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+          <div class="container">
+            <div class="navbar-header">                  
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".collapse-menu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand">
+                <img src="@routes.Assets.at("images/promo.png")">
+                Play Akka Angular
+              </a>
+            </div>
+
+            <div class="collapse navbar-collapse collapse-menu">
+              <ul class="nav navbar-nav">
+               
+              </ul>              
+            </div>
+          </div>
+        </div>
+
+        <div class="container">
+          @content
+        </div>
+
+        <div id="confirm"></div>
+
+    </body>
+</html>

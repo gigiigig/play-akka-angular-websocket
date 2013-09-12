@@ -1,0 +1,14 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Tasks
+GET     /                           controllers.AppController.index
+GET     /start                      controllers.AppController.start
+GET     /stop                       controllers.AppController.stop
+GET     /websocket/                 controllers.AppController.indexWS
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/javascripts/routes  controllers.AppController.javascriptRoutes
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

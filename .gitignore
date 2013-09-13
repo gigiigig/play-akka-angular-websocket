@@ -17,3 +17,4 @@ dist
 .ensime
 .ensime_lucene
 public/images/screens/
+project/activator*

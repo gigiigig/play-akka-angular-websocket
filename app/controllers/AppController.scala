@@ -10,7 +10,6 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.{Enumerator, Iteratee}
 
 import scala.concurrent.Future
-
 import scala.concurrent.duration._
 import actors._
 import akka.actor.Props
@@ -35,13 +34,6 @@ object AppController extends Controller with Secured{
   }
 
   val tasksActor = Akka.system.actorOf(Props[TasksActor])
-
-  def scheduleUpdateTime(): Unit = Promise.timeout({
-    tasksActor ! UpdateTime()
-    scheduleUpdateTime()
-  }, 1000 milliseconds)
-
-  scheduleUpdateTime()
 
   def indexWS = withAuthWS {
     userId =>

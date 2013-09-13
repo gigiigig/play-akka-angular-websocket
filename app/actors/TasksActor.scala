@@ -9,6 +9,9 @@ import play.api.libs.iteratee.{Concurrent, Enumerator}
 
 import play.api.libs.iteratee.Concurrent.Channel
 import play.api.Logger
+import play.api.libs.concurrent.Execution.Implicits._
+
+import scala.concurrent.duration._
 
 /**
  * User: Luigi Antonini
@@ -16,6 +19,8 @@ import play.api.Logger
  * Time: 15.38
  */
 class TasksActor extends Actor {
+
+  val cancellable = context.system.scheduler.schedule(0 second, 1 second, self, UpdateTime())
 
   case class UserChannel(userId: Int, var channelsCount: Int, enumerator: Enumerator[JsValue], channel: Channel[JsValue])
 

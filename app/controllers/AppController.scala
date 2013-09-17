@@ -35,13 +35,24 @@ object AppController extends Controller with Secured{
 
   val tasksActor = Akka.system.actorOf(Props[TasksActor])
 
+  /**
+   * This function crate a WebSocket using the
+   * enumertator linked to the current user,
+   * retreived from the TaskActor. 
+   */
   def indexWS = withAuthWS {
     userId =>
 
       implicit val timeout = Timeout(3 seconds)
 
+      // using the ask pattern of akka, 
+      // get the enumerator for that user
       (tasksActor ? StartSocket(userId)) map {
         enumerator =>
+
+          // create a Itreatee which ignore the input and
+          // and send a SocketClosed message to the actor when
+          // connection is closed from the client
           (Iteratee.ignore[JsValue] mapDone {
             _ =>
               tasksActor ! SocketClosed(userId)
@@ -91,7 +102,9 @@ trait Secured {
   }
 
   /**
-   * Base authentication
+   * Basi authentication system
+   * try to retieve the username, call f() if it is present,
+   * or unauthF() otherwise
    */
   def withAuth(f: => Int => Request[_ >: AnyContent] => Result): EssentialAction = {
     Security.Authenticated(username, unauthF) {
@@ -101,10 +114,18 @@ trait Secured {
   }
 
   /**
-   * Base authentication for WebSocket
+   * This function provide a basic authentication for 
+   * WebSocket, lekely withAuth function try to retrieve the
+   * the username form the session, and call f() funcion if find it,
+   * or create an error Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
+   * if username is none  
    */
   def withAuthWS(f: => Int => Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])]): WebSocket[JsValue] = {
 
+    // this function create an error Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
+    // the itaratee ignore the input and do nothing,
+    // and the enumerator just send a 'not authorized message'
+    // and close the socket, sending Enumerator.eof
     def errorFuture = {
       // Just consume and ignore the input
       val in = Iteratee.ignore[JsValue]

@@ -1,0 +1,49 @@
+<html>
+<head>
+    <title>Hello Scala - Activator Template</title>
+</head>
+<body>
+  <div>
+    <h2>Quick Overview</h2>
+
+    <p>
+      This project shows how to use Play2, Akka and AngularJS
+      for create a simple WebSocket based web application.
+    </p>
+
+    <p>
+      The basic idea is to create a sort of roudtrip from 
+      the user action to the response,
+      using ajax for all http requests and the WebSocket for all resposnses.
+    </p>
+  </div>
+  <div>
+    <h2>The Idea</h2>
+    <p>
+      When user interact with the application,
+      clicking on one of the buttons, throught Angular an ajax call i sended to the server.
+      The server receive the request and send an OK 200 response with no content. 
+    </p>
+    <p>
+      Instead of send the response to te client, 
+      the Play Action send a message to the TasksActor, which handle the message,
+      run its logig and send the response true the user associated WebSocket 
+    </p>
+    <p>
+      There are two advantages : 
+      In case of long compiutation, 
+      we don't need to keep opened the http connection,
+
+      and if user has more then one window opened, all wiondws receive
+      the same data, and mantain the same state.
+    </p>
+  </div>
+  <div>
+    <h2>Play</h2>
+    <div>
+      <p></p>
+    </div>
+  </div>
+
+</body>
+</html>

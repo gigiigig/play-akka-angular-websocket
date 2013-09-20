@@ -81,7 +81,7 @@ enumerator =>
     
     </p>
     <p>
-      The two ajax andler are trivial : 
+      The two ajax handler Actions are trivial : 
 
 <pre><code>
 def start = withAuth {
@@ -173,6 +173,20 @@ $scope.stop = ->
         and the view is automatically updated from Angular.
       </p>
     </div>
+
+    <div>
+      <h2>Considerations</h2>
+      <p>
+        Because we used WebSocket only for the server to client
+        comunication, we can replace that with Server Sent Event
+        and Comet polling.
+        The actor which manage sockets and timers is 
+        just a trivial example, 
+        in a real project with thousands of users,
+        we need to defer some cmputations to other actors.  
+      </p>
+    </div>
+
   </div>
 
 </body>

@@ -179,11 +179,13 @@ $scope.stop = ->
       <p>
         Because we used WebSocket only for the server to client
         comunication, we can replace that with Server Sent Event
-        and Comet polling.
+        and Comet polling without problems thanks to Play api.
+      </p>
+      <p>
         The actor which manage sockets and timers is 
         just a trivial example, 
         in a real project with thousands of users,
-        we need to defer some cmputations to other actors.  
+        we need to defer some computations to other actors. 
       </p>
     </div>
 

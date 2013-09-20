@@ -10,10 +10,13 @@
       for create a simple WebSocket based Timer application.
     </p>
     <p>
-      The basic idea is to create a sort of roudtrip from 
+      The basic idea is to create a sort of roundtrip from 
       the user action to the response,
       using ajax calls for all the http requests and 
       a single WebSocket for all the responses.
+      This is just an example, in a real world application 
+      we need some more hacks to handle an high users number,
+      and of course we need to write tests.
     </p>
   </div>
   <div>
@@ -22,27 +25,27 @@
       When the user open the application,
       a WebSocket is associated with the userid,
       in that case,because this is an example, if user doesn't have an userId
-      in session it is generated autmatically and saved in session.
-      (In Play the session is just a cookie, and there are some heplers to manage it)
+      in session it is generated automatically and saved in session.
+      (In Play the session is just a cookie, and there are some helpers to manage it)
     </p>
     <p>
       When user interact with the application clicking on one of the buttons, 
       through Angular an ajax call is sended to the server.
       The ajax call is handled by a Play Action, 
       this Action instead of send the result of the computation directly to te client, 
-      send a message to the TasksActor and close straightaway 
-      the http request sendin an Ok response.
-      TasksActor handle the message,
+      send a message to the TimerActor and close straightaway 
+      the http request send an Ok response.
+      TimerActor handle the message,
       run its logic and send the operation response to the user through the associated WebSocket 
     </p>
     <p>
       This approach has two advantages : 
       <ul>
         <li>
-          in case of long compiutation, we don't need to keep opened the http connection
+          in case of long computation, we don't need to keep opened the http connection
         </li>
         <li>
-          if the user has more then one window opened, all wiondws receive
+          if the user has more then one window opened, all windows receive
           the same data, and maintain the same state.
         </li>
       </ul>
@@ -52,8 +55,9 @@
     <h2>Play Controller</h2>
     
     <p>
-      The play controller has two main fucntionalities,
-      the first is to create the WebSocket, and the sencond
+      The <a href="#code/app/controllers/AppController.scala" class="shortcut">Play controller</a> 
+      has two main functionalities,
+      the first is to create the WebSocket, and the second
       is to send the right message to the actor when an ajax call come in
     </p>
     <p>
@@ -64,14 +68,14 @@
 
 <pre><code>(Iteratee.ignore[JsValue] mapDone {
 _ =>
-  tasksActor ! SocketClosed(userId)
+  timerActor ! SocketClosed(userId)
 }, enumerator.asInstanceOf[Enumerator[JsValue]])</code></pre>
 
       The Itaretee ignore the input, and when the client close the connection send
       to the actor the message SocketClosed.
-      The enumerator intead, is received from the TasksActor using the ask pattern : 
+      The enumerator instead, is received from the TimerActor using the ask pattern : 
 
-<pre><code>(tasksActor ? StartSocket(userId)) map {
+<pre><code>(timerActor ? StartSocket(userId)) map {
 enumerator =>
 }</code></pre>
     
@@ -82,7 +86,7 @@ enumerator =>
 <pre><code>
 def start = withAuth {
 userId => implicit request =>
-  tasksActor ! Start(userId)
+  timerActor ! Start(userId)
   Ok("")
 }</code></pre>
 
@@ -94,7 +98,7 @@ userId => implicit request =>
     <div>
       <h2>The Actor</h2>
       <p>
-        The actor manage the creation of channels 
+        The <a href="#code/app/actors/TimerActor.scala" class="shortcut">actor</a> manage the creation of channels 
         and the one to one relation between channels and users,
         and manage also the timer scheduler, increase the timer for
         active user and send the responses to users through the sockets,
@@ -102,7 +106,7 @@ userId => implicit request =>
       </p>
       <p>
         <code>case StartSocket(userId) =></code>
-        When the messeage StartSocket come in,
+        When the message StartSocket come in,
         the actor get or create the channel for the current user
 
 <pre><code>webSockets.get(userId) getOrElse {
@@ -111,10 +115,10 @@ userId => implicit request =>
 }</code></pre>
 
         The main method here is <code>Concurrent.broadcast[JsValue]</code>
-        which create a touple <code>(Enumerator[JsValue], Channel[JsValue])</code>
-        This touple is composed by an enumerato and the related channel, 
+        which create a tuple <code>(Enumerator[JsValue], Channel[JsValue])</code>
+        This tuple is composed by an enumerator and the related channel, 
         when we'll write inside the channel through <code>channel.push()</code>
-        methiod, the message is enumerated from the enumerator.
+        method, the message is enumerated from the enumerator.
         So the as last operation for the message StartSocket,
         the actor send back to the sender, the AppController in that case,
         this enumerator which is user in the controller for create the socket
@@ -124,14 +128,14 @@ userId => implicit request =>
         The message UpdateTime is sended every second to the actor thanks the Akka helper
         <code>context.system.scheduler.schedule(0 second, 1 second, self, UpdateTime())</code>
         When this message come in, the actor update the time for every user in the list
-        tasksList, and write in the channel the current time
+        usersTimes, and write in the channel the current time
         <code>webSockets.get(userId).get.channel push Json.toJson(json)</code>
         and this message will be sended to the client from the socket.
       </p>
       <p>
         Pretty trivial are the Start and Stop cases,
-        the Stop case after removed the user from the tasksUsers list,
-        send also a messga to the client with timer 0,
+        the Stop case after removed the user from the usersTimes list,
+        send also a message to the client with timer 0,
         for reset the timer label.
       </p>
 
@@ -139,7 +143,7 @@ userId => implicit request =>
     <div>
       <h2>Angular</h2>
       <p>
-        The Angular controller is simple
+        The <a href="#code/app/assets/javascripts/app.coffee" class="shortcut"></a>Angular controller is simple
 
 <pre><code>$scope.start = ->
   $http.get(jsRoutes.controllers.AppController.start().url).success( -> )
@@ -147,8 +151,8 @@ userId => implicit request =>
 $scope.stop = ->
   $http.get(jsRoutes.controllers.AppController.stop().url).success( -> )</code></pre>
 
-        Start and stop menthds send a get to the Play action,
-        using Play Js routes to crete the right url.
+        Start and stop menthods send a get to the Play action,
+        using Play Js routes to create the right url.
       </p>
       <p>
         When the controller is initialized, 
@@ -166,7 +170,7 @@ $scope.stop = ->
      
         and every time a message come in, it write
         the content inside the controller model, 
-        and the view is automatacally updated from Angular.
+        and the view is automatically updated from Angular.
       </p>
     </div>
   </div>

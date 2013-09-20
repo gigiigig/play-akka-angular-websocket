@@ -33,7 +33,7 @@ object AppController extends Controller with Secured{
       Ok(views.html.app.index())
   }
 
-  val tasksActor = Akka.system.actorOf(Props[TasksActor])
+  val timerActor = Akka.system.actorOf(Props[TimerActor])
 
   /**
    * This function crate a WebSocket using the
@@ -47,7 +47,7 @@ object AppController extends Controller with Secured{
 
       // using the ask pattern of akka, 
       // get the enumerator for that user
-      (tasksActor ? StartSocket(userId)) map {
+      (timerActor ? StartSocket(userId)) map {
         enumerator =>
 
           // create a Itreatee which ignore the input and
@@ -55,21 +55,21 @@ object AppController extends Controller with Secured{
           // connection is closed from the client
           (Iteratee.ignore[JsValue] mapDone {
             _ =>
-              tasksActor ! SocketClosed(userId)
+              timerActor ! SocketClosed(userId)
           }, enumerator.asInstanceOf[Enumerator[JsValue]])
       }
   }
 
   def start = withAuth {
     userId => implicit request =>
-      tasksActor ! Start(userId)
+      timerActor ! Start(userId)
       Ok("")
   }
 
 
   def stop = withAuth {
     userId => implicit request =>
-      tasksActor ! Stop(userId)
+      timerActor ! Stop(userId)
       Ok("")
   }
 

@@ -18,7 +18,7 @@ import scala.concurrent.duration._
  * Date: 19/07/13
  * Time: 15.38
  */
-class TasksActor extends Actor {
+class TimerActor extends Actor {
 
   // crate a scheduler to send a message to this actor every socket
   val cancellable = context.system.scheduler.schedule(0 second, 1 second, self, UpdateTime())
@@ -31,7 +31,7 @@ class TasksActor extends Actor {
   var webSockets = Map[Int, UserChannel]()
 
   // this map relate every user with his current time
-  var usersTasks = Map[Int, Int]()
+  var usersTimes = Map[Int, Int]()
 
   override def receive = {
 
@@ -66,9 +66,9 @@ class TasksActor extends Actor {
 
       // increase the current time for every user,
       // and send current time to the user,
-      usersTasks.foreach {
+      usersTimes.foreach {
         case (userId, millis) =>
-          usersTasks += (userId -> (millis + 1000))
+          usersTimes += (userId -> (millis + 1000))
 
           val json = Map("data" -> toJson(millis))
 
@@ -79,7 +79,7 @@ class TasksActor extends Actor {
 
 
     case Start(userId) =>
-      usersTasks += (userId -> 0)
+      usersTimes += (userId -> 0)
 
     case Stop(userId) =>
       removeUserTimer(userId)
@@ -105,7 +105,7 @@ class TasksActor extends Actor {
 
   }
 
-  def removeUserTimer(userId: Int) = usersTasks -= userId
+  def removeUserTimer(userId: Int) = usersTimes -= userId
   def removeUserChannel(userId: Int) = webSockets -= userId
 
 }

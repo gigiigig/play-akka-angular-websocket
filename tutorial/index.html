@@ -34,7 +34,7 @@
       The ajax call is handled by a Play Action, 
       this Action instead of send the result of the computation directly to te client, 
       send a message to the TimerActor and close straightaway 
-      the http request send an Ok response.
+      the http request with an Ok response.
       TimerActor handle the message,
       run its logic and send the operation response to the user through the associated WebSocket 
     </p>
@@ -61,7 +61,7 @@
       is to send the right message to the actor when an ajax call come in
     </p>
     <p>
-      To create the socket, on the on the <code>withAuthWS</code> method 
+      To create the socket, inside the <code>withAuthWS</code> method 
       we call the function <code>WebSocket.async[JsValue] ()</code>
       which take a Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])].
       This is generated from : 
@@ -86,12 +86,12 @@ enumerator =>
 <pre><code>
 def start = withAuth {
 userId => implicit request =>
-  timerActor ! Start(userId)
+  timerActor ! Start(userId)    
   Ok("")
 }</code></pre>
 
         <code>withAuth</code> provide a basic authentication,
-        and after the function send a message to actor and send the Ok("")
+        and then the function send a message to the   actor and send the Ok("")
         response to the client and close the http connection
       </p>
     </div>
@@ -101,8 +101,8 @@ userId => implicit request =>
         The <a href="#code/app/actors/TimerActor.scala" class="shortcut">actor</a> manage the creation of channels 
         and the one to one relation between channels and users,
         and manage also the timer scheduler, increase the timer for
-        active user and send the responses to users through the sockets,
-        or better writing in the channels.
+        active users and send the updated data to users through the sockets,
+        writing inside the channels.
       </p>
       <p>
         <code>case StartSocket(userId) =></code>
@@ -115,7 +115,7 @@ userId => implicit request =>
 }</code></pre>
 
         The main method here is <code>Concurrent.broadcast[JsValue]</code>
-        which create a tuple <code>(Enumerator[JsValue], Channel[JsValue])</code>
+        which create a tuple <code>(Enumerator[JsValue], Channel[JsValue]).</code>
         This tuple is composed by an enumerator and the related channel, 
         when we'll write inside the channel through <code>channel.push()</code>
         method, the message is enumerated from the enumerator.
@@ -130,7 +130,7 @@ userId => implicit request =>
         When this message come in, the actor update the time for every user in the list
         usersTimes, and write in the channel the current time
         <code>webSockets.get(userId).get.channel push Json.toJson(json)</code>
-        and this message will be sended to the client from the socket.
+        and this message will be sended to the client within the socket.
       </p>
       <p>
         Pretty trivial are the Start and Stop cases,
@@ -143,7 +143,7 @@ userId => implicit request =>
     <div>
       <h2>Angular</h2>
       <p>
-        The <a href="#code/app/assets/javascripts/app.coffee" class="shortcut"></a>Angular controller is simple
+        The <a href="#code/app/assets/javascripts/app.coffee" class="shortcut">Angular controller</a> is simple
 
 <pre><code>$scope.start = ->
   $http.get(jsRoutes.controllers.AppController.start().url).success( -> )
@@ -169,7 +169,7 @@ $scope.stop = ->
     )</code></pre>
      
         and every time a message come in, it write
-        the content inside the controller model, 
+        its  content inside the controller model, 
         and the view is automatically updated from Angular.
       </p>
     </div>

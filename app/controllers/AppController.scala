@@ -45,18 +45,18 @@ object AppController extends Controller with Secured{
 
       implicit val timeout = Timeout(3 seconds)
 
-      // using the ask pattern of akka, 
+      // using the ask pattern of Akka,
       // get the enumerator for that user
       (timerActor ? StartSocket(userId)) map {
         enumerator =>
 
-          // create a Itreatee which ignore the input and
+          // create a Iteratee which ignore the input and
           // and send a SocketClosed message to the actor when
           // connection is closed from the client
-          (Iteratee.ignore[JsValue] mapDone {
+          Right((Iteratee.ignore[JsValue] map {
             _ =>
               timerActor ! SocketClosed(userId)
-          }, enumerator.asInstanceOf[Enumerator[JsValue]])
+          }, enumerator.asInstanceOf[Enumerator[JsValue]]))
       }
   }
 
@@ -120,10 +120,10 @@ trait Secured {
    * or create an error Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
    * if username is none  
    */
-  def withAuthWS(f: => Int => Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])]): WebSocket[JsValue] = {
+  def withAuthWS(f: => Int => Future[Either[Result, (Iteratee[JsValue, Unit], Enumerator[JsValue])]]): WebSocket[JsValue, JsValue] = {
 
     // this function create an error Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
-    // the itaratee ignore the input and do nothing,
+    // the iteratee ignore the input and do nothing,
     // and the enumerator just send a 'not authorized message'
     // and close the socket, sending Enumerator.eof
     def errorFuture = {
@@ -134,19 +134,17 @@ trait Secured {
       val out = Enumerator(Json.toJson("not authorized")).andThen(Enumerator.eof)
 
       Future {
-        (in, out)
+        Left(Unauthorized)
       }
     }
 
-    WebSocket.async[JsValue] {
+    WebSocket.tryAccept[JsValue] {
       request =>
         username(request) match {
           case None =>
             errorFuture
-
           case Some(id) =>
             f(id.toInt)
-            
         }
     }
   }

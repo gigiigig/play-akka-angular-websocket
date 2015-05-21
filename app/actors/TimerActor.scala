@@ -12,6 +12,7 @@ import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 /**
  * User: Luigi Antonini
